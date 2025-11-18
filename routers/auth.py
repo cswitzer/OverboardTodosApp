@@ -1,5 +1,5 @@
 from datetime import timedelta, datetime, timezone
-from typing import Annotated
+from typing import Annotated, Any, Dict, List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -36,7 +36,7 @@ def authenticate_user(username: str, password: str, db: Session) -> Users | None
 
 def create_access_token(
     username: str, user_id: int, role: str, expires_delta: timedelta
-):
+) -> str:
     # build the payload and set the expiration
     encode = {"sub": username, "id": user_id, "role": role}
     expires = datetime.now(timezone.utc) + expires_delta
@@ -44,13 +44,15 @@ def create_access_token(
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth_bearer)]):
+async def get_current_user(
+    token: Annotated[str, Depends(oauth_bearer)],
+) -> dict[str, Any]:
     try:
         # check if signature is valid and not expired
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        user_id: int = payload.get("id")
-        user_role: str = payload.get("role")
+        username: str | None = payload.get("sub")
+        user_id: int | None = payload.get("id")
+        user_role: str | None = payload.get("role")
         if username is None or user_id is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -80,7 +82,9 @@ class Token(BaseModel):
 
 # Already adding prefix "/auth" in APIRouter
 @router.post("/", status_code=status.HTTP_201_CREATED)
-async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
+async def create_user(
+    db: db_dependency, create_user_request: CreateUserRequest
+) -> None:
     create_user_model = Users(
         **create_user_request.model_dump(exclude={"password"}),
         hashed_password=bcrypt_context.hash(create_user_request.password),
@@ -90,15 +94,10 @@ async def create_user(db: db_dependency, create_user_request: CreateUserRequest)
     db.commit()
 
 
-@router.get("/users/", status_code=status.HTTP_200_OK)
-async def get_users(db: db_dependency):
-    return db.query(Users).all()
-
-
 @router.post("/token/", response_model=Token)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency
-):
+) -> Dict[str, str]:
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise HTTPException(

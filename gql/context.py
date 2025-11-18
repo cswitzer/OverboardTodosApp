@@ -1,8 +1,10 @@
+from typing import Any
+from sqlalchemy.orm import Session
 from fastapi import Depends
 from database import get_db
 
 
-def get_context(db=Depends(get_db)):
+def get_context(db: Session = Depends(get_db)) -> dict[str, Any]:
     """Returns a context dictionary for GraphQL resolvers.
 
     This function is used to provide the database session to the resolvers.

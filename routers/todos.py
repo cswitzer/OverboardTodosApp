@@ -1,7 +1,7 @@
-from typing import Annotated
+from typing import Annotated, Dict, List
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 from models import Todos
 from .auth import get_current_user
@@ -32,10 +32,25 @@ class TodoRequest(BaseModel):
     }
 
 
-@router.get("/todos/{todo_id}/", status_code=status.HTTP_200_OK)
+class TodoResponse(BaseModel):
+    id: int
+    title: str
+    description: str
+    priority: int
+    complete: bool
+    owner_id: int
+
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
+
+
+@router.get(
+    "/todos/{todo_id}/", status_code=status.HTTP_200_OK, response_model=TodoResponse
+)
 async def read_todo(
     user: user_dependency, db: db_dependency, todo_id: int = Path(gt=0)
-):
+) -> TodoResponse:
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed"
@@ -56,7 +71,7 @@ async def read_todo(
 @router.post("/todos/", status_code=status.HTTP_201_CREATED)
 async def create_todo(
     user: user_dependency, db: db_dependency, todo_request: TodoRequest
-):
+) -> None:
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed"
@@ -66,8 +81,8 @@ async def create_todo(
     db.commit()
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
-async def read_all(user: user_dependency, db: db_dependency):
+@router.get("/", status_code=status.HTTP_200_OK, response_model=List[TodoResponse])
+async def read_all(user: user_dependency, db: db_dependency) -> List[Todos]:
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed"
@@ -75,7 +90,9 @@ async def read_all(user: user_dependency, db: db_dependency):
     return db.query(Todos).filter(Todos.owner_id == user.get("id")).all()
 
 
-@router.get("/todos/", status_code=status.HTTP_200_OK)
+@router.get(
+    "/todos/", status_code=status.HTTP_200_OK, response_model=List[TodoResponse]
+)
 async def read_todos(
     user: user_dependency,
     db: db_dependency,
@@ -86,7 +103,7 @@ async def read_todos(
     ),
     limit: int = Query(10, ge=1, le=100, description="Limit number of results"),
     offset: int = Query(0, ge=0, description="Offset for results"),
-):
+) -> List[Todos]:
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed"
@@ -107,8 +124,8 @@ async def read_todos(
 
 @router.post("/todos/bulk/create/", status_code=status.HTTP_201_CREATED)
 async def create_todos_bulk(
-    user: user_dependency, db: db_dependency, todo_requests: list[TodoRequest]
-):
+    user: user_dependency, db: db_dependency, todo_requests: List[TodoRequest]
+) -> None:
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed"
@@ -122,8 +139,10 @@ async def create_todos_bulk(
     db.commit()
 
 
-@router.delete("/todos/bulk/delete/", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_todos_bulk(db: db_dependency, todo_ids: list[int] = Query()):
+@router.delete("/todos/bulk/delete/", status_code=status.HTTP_200_OK)
+async def delete_todos_bulk(
+    db: db_dependency, todo_ids: List[int] = Query()
+) -> Dict[str, str]:
     if not todo_ids:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="No IDs provided"
@@ -152,7 +171,7 @@ async def update_todo(
     db: db_dependency,
     todo_request: TodoRequest,
     todo_id: int = Path(gt=0),
-):
+) -> None:
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed"
@@ -179,7 +198,7 @@ async def update_todo(
 @router.delete("/todos/{todo_id}/", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_todo(
     user: user_dependency, db: db_dependency, todo_id: int = Path(gt=0)
-):
+) -> None:
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed"

@@ -20,7 +20,7 @@ class UserVerification(BaseModel):
 
 
 @router.get("/me", status_code=status.HTTP_200_OK)
-async def read_current_user(user: user_dependency):
+async def read_current_user(user: user_dependency) -> user_dependency:
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
@@ -33,7 +33,7 @@ async def change_password(
     user: user_dependency,
     db: db_dependency,
     user_verification: UserVerification,
-):
+) -> None:
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"

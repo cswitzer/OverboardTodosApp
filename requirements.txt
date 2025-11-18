@@ -57,6 +57,9 @@ SQLAlchemy==2.0.42
 starlette==0.47.2
 strawberry-graphql==0.285.0
 typer==0.16.0
+types-passlib==1.7.7.20250602
+types-pyasn1==0.6.0.20250914
+types-python-jose==3.5.0.20250531
 typing-inspection==0.4.1
 typing_extensions==4.14.1
 urllib3==2.5.0
