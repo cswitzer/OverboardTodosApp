@@ -1,0 +1,53 @@
+from database import Base
+from sqlalchemy import String, Boolean, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from typing import List
+
+
+class Users(Base):
+    __tablename__ = "users"
+
+    # Using SQLAlchemy 2.0 style with Mapped and mapped_column
+    # the strengths here include better type checking and IDE support
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True)
+    username: Mapped[str] = mapped_column(String(50), unique=True)
+    first_name: Mapped[str] = mapped_column(String(100))
+    last_name: Mapped[str] = mapped_column(String(100))
+    hashed_password: Mapped[str] = mapped_column(String(255))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    role: Mapped[str] = mapped_column(String(50))
+    todos: Mapped[List["Todos"]] = relationship("Todos", back_populates="owner")
+
+    # Using old style for reference
+    # id = Column(Integer, primary_key=True, index=True)
+    # email = Column(String, unique=True)
+    # username = Column(String, unique=True)
+    # first_name = Column(String)
+    # last_name = Column(String)
+    # hashed_password = Column(String)
+    # is_active = Column(Boolean, default=True)
+    # role = Column(String)
+
+
+class Todos(Base):
+    __tablename__ = "todos"
+
+    # Using SQLAlchemy 2.0 style with Mapped and mapped_column
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    title: Mapped[str] = mapped_column(String(100), unique=True)
+    description: Mapped[str] = mapped_column(String(500))
+    priority: Mapped[int] = mapped_column()
+    complete: Mapped[bool] = mapped_column(Boolean, default=False)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+
+    # Does not relate to a column in the db. Provides convenient access to the related user object.
+    owner: Mapped["Users"] = relationship("Users", back_populates="todos")
+
+    # Using old style for reference
+    # id = Column(Integer, primary_key=True, index=True)
+    # title = Column(String)
+    # description = Column(String)
+    # priority = Column(Integer)
+    # complete = Column(Boolean, default=False)
+    # owner_id = Column(Integer, ForeignKey("users.id"))
