@@ -1,11 +1,11 @@
 from datetime import timedelta, datetime, timezone
-from typing import Annotated, Any, Dict, List
+from typing import Annotated, Any, Dict
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from models import Users
 from starlette import status
-from database import get_db
+from app.models import Users
+from app.database import get_db
 from passlib.context import CryptContext
 from fastapi.security import (
     OAuth2PasswordRequestForm,

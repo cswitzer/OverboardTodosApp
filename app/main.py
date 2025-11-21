@@ -1,7 +1,9 @@
 from fastapi import FastAPI
-from database import engine
-import models
-from routers import auth, todos, admin, users
+from app.database import engine
+import app.models as models
+from app.routers import auth, todos, admin, users
+
+# from .config import get_settings
 
 from strawberry.fastapi import GraphQLRouter
 from gql.schema import schema

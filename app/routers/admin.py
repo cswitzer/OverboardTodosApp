@@ -1,8 +1,8 @@
 from typing import Annotated, List
-from database import get_db
+from app.database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Path, status
 from sqlalchemy.orm import Session
-from models import Todos
+from app.models import Todos
 from .todos import TodoResponse
 from .auth import get_current_user
 

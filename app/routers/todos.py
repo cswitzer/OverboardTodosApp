@@ -1,9 +1,9 @@
 from typing import Annotated, Dict, List
-from database import get_db
+from app.database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
-from models import Todos
+from app.models import Todos
 from .auth import get_current_user
 
 
