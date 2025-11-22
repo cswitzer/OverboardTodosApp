@@ -496,3 +496,28 @@ query {
 ```
 
 This GraphQL query requests a todo item with an ID of 1, along with its associated owner information. Any of these fields can be omitted if the client does not need them, which is one of the key benefits of using GraphQL. Notice how the query here matches up with the structure of the `TodoType` and `UserType` classes defined in the schema, and how todo is exposed as a field on the `Query` class.
+
+#### Using uv to manage Python applications
+
+`uv` is a tool for managing Python applications. It provides a simple interface for running and managing Python applications, including support for virtual environments, dependency management, and more.
+
+```bash
+# Create a new project with uv and a virtual environment
+uv init myproj
+
+# add deps to the project
+uv add fastapi uvicorn sqlalchemy pydantic
+
+# Run the application (by prepending uv, we do not need to explicitly activate the virtual environment)
+uv run --reload main:app
+
+# For pre-existing projects, just run the following commands
+uv init --bare # creates pyproject.toml and uv.lock files without creating a new project directory
+uv add -r requirements.txt # adds dependencies from an existing requirements.txt file
+
+# Additionally, use uv sync to install packages from the uv.lock file,
+# which ensures that the exact versions of dependencies are installed as specified in the lock file.
+uv sync
+```
+
+These are use the basic commands to get started with `uv`. This was by far the easiest Python dependency management tool I have ever used!
