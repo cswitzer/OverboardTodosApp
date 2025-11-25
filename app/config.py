@@ -8,8 +8,15 @@ class Settings(BaseSettings):
 
 class LocalSettings(Settings):
     # Get override by env file when they are added
-    DEBUG: bool = True
-    DATABASE_URL: str | None = None
+    FASTAPI_CONFIG: str = "local"
+    DATABASE_URL: str = None
+    POSTGRES_USER: str = "todo_user"
+    POSTGRES_PASSWORD: str = ""
+    POSTGRES_HOST: str = "db"
+    POSTGRES_PORT: int = 5432
+    POSTGRES_DB: str = "todo_db"
+    CELERY_BROKER_URL: str = "redis://redis:6379/0"
+    CELERY_RESULT_BACKEND: str = "redis://redis:6379/0"
 
     class Config:
         env_file = ".env/.env.local"

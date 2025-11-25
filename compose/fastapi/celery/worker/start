@@ -3,4 +3,7 @@
 set -o errexit
 set -o nounset
 
-celery -A main.celery worker --loglevel=info
+# app is the directory where celery_app.py is located
+# and celery is the Celery instance inside celery_app.py
+# worker command to start the Celery worker
+celery -A app.celery_app.celery worker --loglevel=info

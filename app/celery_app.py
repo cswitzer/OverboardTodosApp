@@ -1,5 +1,15 @@
 from celery import Celery
+from app.config import get_settings
 
-# celery = Celery(
-#     "app", broker="redis://localhost:6379/0", backend="redis://localhost:6379/0"
-# )
+settings = get_settings()
+
+celery = Celery(
+    "worker",
+    broker=settings.CELERY_BROKER_URL,
+    backend=settings.CELERY_RESULT_BACKEND,
+)
+
+
+@celery.task(name="add")
+def add(x: int, y: int) -> int:
+    return x + y

@@ -4,4 +4,8 @@ set -o errexit
 set -o nounset
 
 rm -f './celerybeat.pid'
-celery -A main.celery beat -l info
+
+# app is the directory where celery_app.py is located
+# and celery is the Celery instance inside celery_app.py
+# beat command to start the Celery beat scheduler
+celery -A app.celery_app.celery beat -l info

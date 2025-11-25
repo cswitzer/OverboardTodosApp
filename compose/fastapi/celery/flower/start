@@ -4,7 +4,7 @@ set -o errexit
 set -o nounset
 
 worker_ready() {
-    celery -A main.celery inspect ping
+    celery -A app.celery_app.celery inspect ping
 }
 
 until worker_ready; do
@@ -13,6 +13,7 @@ until worker_ready; do
 done
 >&2 echo 'Celery workers is available'
 
+# must install flower to use the flower option with celery
 celery flower \
-    --app=main.celery \
-    --broker="${CELERY_BROKER_URL}"
+  --app=app.celery_app.celery \
+  --broker="${CELERY_BROKER_URL}"

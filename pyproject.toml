@@ -23,6 +23,7 @@ dependencies = [
     "fastapi==0.116.1",
     "fastapi-cli==0.0.8",
     "fastapi-cloud-cli==0.1.5",
+    "flower>=2.0.1",
     "graphql-core==3.2.7",
     "greenlet==3.2.3",
     "h11==0.16.0",

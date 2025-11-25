@@ -4,14 +4,12 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 RUN apt-get update \
-    # dependencies for building Python packages
-    && apt-get install -y build-essential \
-    # psycopg2 dependencies
-    && apt-get install -y libpq-dev \
-    # additional deps
-    && apt-get install -y telnet netcat \
-    # clean unused deps needed during building
-    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        libpq-dev \
+        telnet \
+        netcat-openbsd \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Requirements are installed here to ensure they will be cached.

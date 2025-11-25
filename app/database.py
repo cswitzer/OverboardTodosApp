@@ -3,13 +3,15 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from config import get_settings
 
-SQLACHEMY_DATABASE_URL = "sqlite:///./todosapp.db"
+settings = get_settings()
+
+# SQLACHEMY_DATABASE_URL = "sqlite:///./todosapp.db"
+DATABASE_URL = settings.DATABASE_URL or "sqlite:///./todosapp.db"
 
 # Creates a connection to the SQLite database with multithreading support.
-engine = create_engine(
-    SQLACHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 
 # Creates a new database session to interact with the database.
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
