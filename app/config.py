@@ -9,7 +9,7 @@ class Settings(BaseSettings):
 class LocalSettings(Settings):
     # Get override by env file when they are added
     FASTAPI_CONFIG: str = "local"
-    DATABASE_URL: str = None
+    DATABASE_URL: str = ""
     POSTGRES_USER: str = "todo_user"
     POSTGRES_PASSWORD: str = ""
     POSTGRES_HOST: str = "db"
@@ -23,5 +23,5 @@ class LocalSettings(Settings):
 
 
 @lru_cache(maxsize=1)
-def get_settings() -> Settings:
+def get_settings() -> LocalSettings:
     return LocalSettings()

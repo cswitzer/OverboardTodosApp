@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from app.database import Base
-from sqlalchemy import String, Boolean, ForeignKey
+from sqlalchemy import String, Boolean, ForeignKey, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List
 
@@ -30,6 +32,16 @@ class Users(Base):
     # role = Column(String)
 
 
+# Association table that allows a convenient way to have m2m relationships
+# # A todo can have many tags, and a tag can be on many todos
+todo_tags = Table(
+    "todo_tags",
+    Base.metadata,
+    Column("todo_id", ForeignKey("todos.id"), primary_key=True),
+    Column("tag_id", ForeignKey("tags.id"), primary_key=True),
+)
+
+
 class Todos(Base):
     __tablename__ = "todos"
 
@@ -44,6 +56,9 @@ class Todos(Base):
     # Does not relate to a column in the db. Provides convenient access to the related user object.
     owner: Mapped["Users"] = relationship("Users", back_populates="todos")
 
+    # lets you access all tags for a todo
+    tags: Mapped[List[Tags]] = relationship(secondary=todo_tags, back_populates="todos")
+
     # Using old style for reference
     # id = Column(Integer, primary_key=True, index=True)
     # title = Column(String)
@@ -51,3 +66,14 @@ class Todos(Base):
     # priority = Column(Integer)
     # complete = Column(Boolean, default=False)
     # owner_id = Column(Integer, ForeignKey("users.id"))
+
+
+class Tags(Base):
+    __tablename__ = "tags"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(50), unique=True)
+
+    todos: Mapped[List[Todos]] = relationship(
+        secondary=todo_tags, back_populates="tags"
+    )
