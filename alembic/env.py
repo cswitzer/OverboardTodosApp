@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from app import models
+from app import models  # noqa: F401
 from app.config import get_settings
 
 
@@ -23,8 +23,7 @@ config.set_main_option("sqlalchemy.url", get_url())
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+fileConfig(config.config_file_name)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
