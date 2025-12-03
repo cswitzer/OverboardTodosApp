@@ -5,4 +5,5 @@ set -o pipefail
 set -o nounset
 
 alembic upgrade head
-uvicorn main:app --reload --reload-dir project --host 0.0.0.0
+# Refer to app/app/ directory for FastAPI application instance
+uvicorn app.main:app --reload --reload-dir app --host 0.0.0.0

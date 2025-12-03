@@ -1,9 +1,10 @@
-from typing import Generator, Any
+from app.config import get_settings
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from app.config import get_settings
+from typing import Generator, Any
 
 settings = get_settings()
 
@@ -11,7 +12,7 @@ settings = get_settings()
 DATABASE_URL = settings.DATABASE_URL or "sqlite:///./todosapp.db"
 
 # Creates a connection to the SQLite database with multithreading support.
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(DATABASE_URL)
 
 # Creates a new database session to interact with the database.
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
