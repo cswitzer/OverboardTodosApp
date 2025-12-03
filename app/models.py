@@ -19,6 +19,7 @@ class Users(Base):
     hashed_password: Mapped[str] = mapped_column(String(255))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     role: Mapped[str] = mapped_column(String(50))
+    phone_number: Mapped[str] = mapped_column(String(20), nullable=True)
     todos: Mapped[List["Todos"]] = relationship("Todos", back_populates="owner")
 
     # Using old style for reference

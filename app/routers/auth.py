@@ -2,7 +2,7 @@ from datetime import timedelta, datetime, timezone
 from typing import Annotated, Any, Dict
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from starlette import status
 from app.models import Users
 from app.database import get_db
@@ -23,6 +23,16 @@ SECRET_KEY = "f65da53e49581fc4b58ec88c6907fec197bddabd5619d91fc12e70e709f34903"
 ALGORITHM = "HS256"
 
 db_dependency = Annotated[Session, Depends(get_db)]
+
+
+class CreateUserRequest(BaseModel):
+    username: str = Field(min_length=3, max_length=50)
+    email: str = Field(min_length=5, max_length=255)
+    first_name: str = Field(min_length=1, max_length=100)
+    last_name: str = Field(min_length=1, max_length=100)
+    password: str = Field(min_length=8, max_length=100)
+    role: str = Field(min_length=3, max_length=50)
+    phone_number: str | None = Field(default=None, min_length=7, max_length=20)
 
 
 def authenticate_user(username: str, password: str, db: Session) -> Users | None:
@@ -64,15 +74,6 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate user.",
         )
-
-
-class CreateUserRequest(BaseModel):
-    username: str
-    email: str
-    first_name: str
-    last_name: str
-    password: str
-    role: str
 
 
 class Token(BaseModel):
