@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from app.database import engine
 import app.models as models
-from app.routers import auth, todos, admin, users
+from app.routers import auth, todos, admin, users, tags
 
 # from .config import get_settings
 
@@ -18,6 +18,7 @@ app.include_router(auth.router)
 app.include_router(todos.router)
 app.include_router(admin.router)
 app.include_router(users.router)
+app.include_router(tags.router)
 
 # GraphQL endpoint
 graphql_app = GraphQLRouter(schema, context_getter=get_context)

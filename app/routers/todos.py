@@ -3,7 +3,8 @@ from app.database import get_db
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
-from app.models import Todos
+from app.models import Tags, Todos
+from app.routers.tags import TagsResponse
 from .auth import get_current_user
 
 
@@ -19,6 +20,7 @@ class TodoRequest(BaseModel):
     description: str = Field(min_length=3, max_length=100)
     priority: int = Field(gt=0, lt=6)
     complete: bool = Field(default=False)
+    tags: List[int] = Field(default=[])
 
     model_config = {
         "json_schema_extra": {
@@ -39,10 +41,9 @@ class TodoResponse(BaseModel):
     priority: int
     complete: bool
     owner_id: int
+    tags: List[TagsResponse] = []
 
-    model_config = ConfigDict(
-        from_attributes=True,
-    )
+    model_config = ConfigDict(from_attributes=True)
 
 
 @router.get(
@@ -76,7 +77,10 @@ async def create_todo(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication failed"
         )
-    todo_model = Todos(**todo_request.model_dump(), owner_id=user.get("id"))
+    todo_request_dict = todo_request.model_dump()
+    tag_ids = todo_request_dict.pop("tags", [])
+    tag_objs = db.query(Tags).filter(Tags.id.in_(tag_ids)).all()
+    todo_model = Todos(**todo_request_dict, owner_id=user.get("id"), tags=tag_objs)
     db.add(todo_model)
     db.commit()
 
