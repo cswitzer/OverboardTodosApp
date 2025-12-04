@@ -1,26 +1,19 @@
-from datetime import timedelta, datetime, timezone
-from typing import Annotated, Any, Dict
+from datetime import timedelta
+from typing import Annotated, Dict
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 from starlette import status
 from app.models import Users
 from app.database import get_db
+from app.utils.auth_utils import authenticate_user, create_access_token
 from passlib.context import CryptContext
 from fastapi.security import (
     OAuth2PasswordRequestForm,
-    OAuth2PasswordBearer,  # check the bearer token
 )
-from jose import jwt, JWTError
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth_bearer = OAuth2PasswordBearer(tokenUrl="auth/token/")
-
-# Never expose your secret key in production code like this. I am just learning here.
-SECRET_KEY = "f65da53e49581fc4b58ec88c6907fec197bddabd5619d91fc12e70e709f34903"
-ALGORITHM = "HS256"
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
@@ -33,47 +26,6 @@ class CreateUserRequest(BaseModel):
     password: str = Field(min_length=8, max_length=100)
     role: str = Field(min_length=3, max_length=50)
     phone_number: str | None = Field(default=None, min_length=7, max_length=20)
-
-
-def authenticate_user(username: str, password: str, db: Session) -> Users | None:
-    user = db.query(Users).filter(Users.username == username).first()
-    if not user:
-        return None
-    if not bcrypt_context.verify(password, user.hashed_password):
-        return None
-    return user
-
-
-def create_access_token(
-    username: str, user_id: int, role: str, expires_delta: timedelta
-) -> str:
-    # build the payload and set the expiration
-    encode = {"sub": username, "id": user_id, "role": role}
-    expires = datetime.now(timezone.utc) + expires_delta
-    encode.update({"exp": expires})
-    return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
-
-
-async def get_current_user(
-    token: Annotated[str, Depends(oauth_bearer)],
-) -> dict[str, Any]:
-    try:
-        # check if signature is valid and not expired
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str | None = payload.get("sub")
-        user_id: int | None = payload.get("id")
-        user_role: str | None = payload.get("role")
-        if username is None or user_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate credentials.",
-            )
-        return {"username": username, "id": user_id, "user_role": user_role}
-    except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate user.",
-        )
 
 
 class Token(BaseModel):

@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 from app.models import Tags, Todos
 from app.routers.tags import TagsResponse
-from .auth import get_current_user
+from app.utils.auth_utils import get_current_user
 
 
 router = APIRouter()

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import Field, BaseModel
 from sqlalchemy.orm import Session
 from app.models import Users
-from .auth import get_current_user
+from app.utils.auth_utils import get_current_user
 from passlib.context import CryptContext
 
 router = APIRouter(prefix="/user", tags=["user"])

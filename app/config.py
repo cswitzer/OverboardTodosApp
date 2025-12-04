@@ -17,6 +17,7 @@ class LocalSettings(Settings):
     POSTGRES_DB: str = "todo_db"
     CELERY_BROKER_URL: str = "redis://redis:6379/0"
     CELERY_RESULT_BACKEND: str = "redis://redis:6379/0"
+    SECRET_KEY: str = ""
 
     class Config:
         env_file = ".env/.env.local"
