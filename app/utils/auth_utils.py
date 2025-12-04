@@ -38,7 +38,7 @@ def create_access_token(
 
 
 async def get_current_user(
-    token: Annotated[str, Depends[oauth_bearer]],
+    token: str = Depends(oauth_bearer),
 ) -> dict[str, Any]:
     try:
         payload = jwt.decode(
