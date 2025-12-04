@@ -1,0 +1,115 @@
+# https://taskfile.dev
+
+version: "3"
+
+vars:
+  GREETING: Hello, World!
+
+tasks:
+  default:
+    cmds:
+      - echo "{{.GREETING}}"
+    silent: true
+
+  # Docker Compose management tasks
+
+  up:
+    desc: "Start Docker Compose services"
+    cmds:
+      - docker compose up -d
+
+  down:
+    desc: "Stop Docker Compose services"
+    cmds:
+      - docker compose down
+
+  build:
+    desc: "Build Docker Compose services"
+    cmds:
+      - docker compose build
+
+  restart:
+    desc: "Restart Docker Compose services"
+    cmds:
+      - docker compose restart
+
+  logs:
+    desc: "View Docker Compose logs"
+    cmds:
+      - docker compose logs -f
+
+  shell:
+    desc: "Open a shell in the web container"
+    cmds:
+      - docker compose run --rm web bash
+
+  # Database migration tasks
+
+  new-migration:
+    desc: "Create new database migrations"
+    vars:
+      MSG: "{{.MSG | default `New migration`}}"
+    cmds:
+      - uv run alembic revision -m "{{.MSG}}"
+
+  apply-migrations:
+    desc: "Apply database migrations"
+    cmds:
+      - docker compose run --rm web alembic upgrade head
+
+  migrate-history:
+    desc: "Show Alembic migration history"
+    cmds:
+      - docker compose run --rm web alembic history
+
+  # CI and code quality tasks
+
+  mypy:
+    desc: "Run mypy type checks"
+    cmds:
+      - uv run mypy .
+
+  lint:
+    desc: "Run linting with ruff"
+    cmds:
+      - uv run ruff check .
+
+  format:
+    desc: "Format code with ruff"
+    cmds:
+      - uv run ruff format .
+
+  sync-deps:
+    desc: "Update lockfile and export requirements.txt"
+    cmds:
+      - uv lock
+      - uv export -o requirements.txt
+
+  check:
+    desc: "Run all code quality checks"
+    cmds:
+      - task: mypy
+      - task: lint
+      - task: sync-deps
+      # - task: test
+
+  # Testing tasks
+
+  test:
+    desc: "Run pytest in web container"
+    cmds:
+      - docker compose run --rm web pytest
+
+  test-one:
+    desc: "Run pytest for a specific test file"
+    cmds:
+      - docker compose run --rm web pytest "{{.CLI_ARGS}}"
+
+  # Database management tasks
+
+  db-shell:
+    desc: "Open a psql shell to the Postgres database"
+    dotenv:
+      - .env/.env.local
+    cmds:
+      - docker compose exec db psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}"
