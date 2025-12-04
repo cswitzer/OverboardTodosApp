@@ -26,7 +26,7 @@ def authenticate_user(username: str, password: str, db: Session) -> Users | None
 
 def create_access_token(
     username: str, user_id: int, role: str, expires_delta: timedelta
-):
+) -> str:
     headers = {"alg": "HS256", "typ": "JWT"}
     body = {
         "sub": username,
