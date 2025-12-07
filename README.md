@@ -1,6 +1,6 @@
 "# Fastapi-The-Complete-Course"
 
-### Project 1: FastAPI Request Method Logic
+### Section 1: FastAPI Request Method Logic
 
 #### These lines allow uvicorn to identify that we are creating a FastAPI app.
 
@@ -169,7 +169,7 @@ async def update_book(book: BookRequest):
     ... # Update logic here
 ```
 
-### Project 2: Databases, Authentication, and Authorization
+### Section 2: Databases, Authentication, and Authorization
 
 #### Create a database using SQLite and SQLAlchemy.
 
@@ -389,7 +389,7 @@ ALGORITHM = "HS256"
 
 ```
 
-#### GraphQL with Strawberry
+### Section 3: GraphQL with Strawberry
 
 GraphQL is a query language for APIs that allows clients to request only the data they need. It provides a more efficient and flexible way to interact with APIs compared to REST.
 
@@ -497,7 +497,7 @@ query {
 
 This GraphQL query requests a todo item with an ID of 1, along with its associated owner information. Any of these fields can be omitted if the client does not need them, which is one of the key benefits of using GraphQL. Notice how the query here matches up with the structure of the `TodoType` and `UserType` classes defined in the schema, and how todo is exposed as a field on the `Query` class.
 
-#### Using uv to manage Python applications
+### Section 4: Using uv to manage Python applications
 
 `uv` is a tool for managing Python applications. It provides a simple interface for running and managing Python applications, including support for virtual environments, dependency management, and more.
 
@@ -521,3 +521,25 @@ uv sync
 ```
 
 These are use the basic commands to get started with `uv`. This was by far the easiest Python dependency management tool I have ever used!
+
+### Section 5: OAuth2 and Social Authentication
+
+OAuth2 is an open standard for accessing user data without exposing their credentials. It allows users to grant third-party applications limited access to
+their resources on other services. For example, if I want to sign up for example.com without inputting an email and password, I can use my Google account
+to authenticate me instead. This is called social authentication.
+
+Here is a simple workflow for OAuth2 social authentication:
+
+```
+| Step | From → To          | HTTP Method                                   | Action / Purpose                                                                  |
+| ---- | ------------------ | --------------------------------------------- | --------------------------------------------------------------------------------- |
+| 1    | Browser → FastAPI  | GET /auth/google/login                        | User clicks “Sign in with Google”; browser requests login endpoint.               |
+| 2    | FastAPI → Browser  | 302 Redirect → Google OAuth URL               | FastAPI redirects browser to Google login page.                                   |
+| 3    | Browser → Google   | GET /accounts.google.com                      | Browser loads Google login page; user enters credentials.                         |
+| 4    | Google → Browser   | 302 Redirect → /auth/google/callback?code=XYZ | After login, Google redirects browser to your callback with authorization code.   |
+| 5    | Browser → FastAPI  | GET /auth/google/callback?code=XYZ            | Browser requests your callback endpoint; FastAPI receives the code.               |
+| 6    | FastAPI → Google   | POST /oauth2/token                            | FastAPI exchanges code for access token, id token, and user profile.              |
+| 7    | Google → FastAPI   | 200 OK                                        | Google returns tokens to FastAPI.                                                 |
+| 8    | FastAPI → Browser  | 302 Redirect → /login-success?token=JWT       | FastAPI creates/fetches local user, generates JWT, redirects browser to frontend. |
+| 9    | Browser → Frontend | GET /login-success?token=JWT                  | Frontend receives JWT, stores it, and logs in the user.                           |
+```
