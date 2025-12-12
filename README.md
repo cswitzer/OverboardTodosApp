@@ -543,3 +543,36 @@ Here is a simple workflow for OAuth2 social authentication:
 | 8    | FastAPI → Browser  | 302 Redirect → /login-success?token=JWT       | FastAPI creates/fetches local user, generates JWT, redirects browser to frontend. |
 | 9    | Browser → Frontend | GET /login-success?token=JWT                  | Frontend receives JWT, stores it, and logs in the user.                           |
 ```
+
+Before initiating OAuth2 requests to Google or other providers, register an app with the provider (Google Cloud Console for Google) to
+obtain a Client ID and Client Secret. Set the following so that Google we can initiate the OAuth2 flow:
+
+Authorized Javascript origins (origins where JS can initiate OAuth2 requests):
+
+```
+http://localhost:3000
+http://localhost:8000
+```
+
+Authorized redirect URIs (Where the provider redirects after authentication - our FastAPI endpoint):
+
+```
+http://localhost:8000/auth/google/callback
+```
+
+Obviously, in production, these URLs will need to be updated to reflect your actual domain and use HTTPS.
+
+Additionally, we need to use the following three endpoints from Google's OAuth2 API:
+
+1. Authorization Endpoint: `https://accounts.google.com/o/oauth2/v2/auth`
+
+   - Where the user is redirected to authenticate and authorize the application.
+
+2. Token Endpoint: `https://oauth2.googleapis.com/token`
+
+   - Where the application exchanges the authorization code for access and ID tokens.
+
+3. User Info Endpoint: `https://www.googleapis.com/oauth2/v3/userinfo`
+   - Where the application retrieves the user's profile information using the access token.
+
+For clear docs on Google's OAuth2 implementation, see: https://developers.google.com/identity/protocols/oauth2/web-server

@@ -1,12 +1,23 @@
 from datetime import timedelta
 from typing import Annotated, Dict
+from urllib.parse import urlencode
 from fastapi import APIRouter, Depends, HTTPException
+import httpx
+import secrets
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 from starlette import status
+from starlette.responses import RedirectResponse
 from app.models import Users
+from app.config import get_settings
 from app.database import get_db
-from app.utils.auth_utils import authenticate_user, create_access_token
+from app.utils.auth_utils import (
+    authenticate_user,
+    create_access_token,
+    GOOGLE_AUTH_URL,
+    GOOGLE_TOKEN_URL,
+    GOOGLE_USERINFO_URL,
+)
 from passlib.context import CryptContext
 from fastapi.security import (
     OAuth2PasswordRequestForm,
@@ -14,6 +25,7 @@ from fastapi.security import (
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+settings = get_settings()
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
@@ -65,3 +77,91 @@ async def login_for_access_token(
         expires_delta=timedelta(minutes=30),
     )
     return {"access_token": token, "token_type": "bearer"}
+
+
+@router.get("/google/login", status_code=status.HTTP_302_FOUND)
+async def google_login():
+    params = dict(
+        client_id=settings.GOOGLE_CLIENT_ID,
+        redirect_uri=f"{settings.GOOGLE_REDIRECT_URI}",
+        response_type="code",
+        scope="openid email profile",
+        access_type="offline",
+        prompt="consent",
+    )
+    auth_url = f"{GOOGLE_AUTH_URL}?{urlencode(params)}"
+    return RedirectResponse(auth_url)
+
+
+@router.get("/google/callback", status_code=status.HTTP_302_FOUND)
+async def google_callback(code: str, db: db_dependency):
+    async with httpx.AsyncClient() as client:
+        # Exchange code for token. Note that this token is different from our JWT token in that
+        # it is used to access Google APIs. Not to be confused with our own access token.
+        token_response = await client.post(
+            GOOGLE_TOKEN_URL,
+            data=dict(
+                code=code,
+                client_id=settings.GOOGLE_CLIENT_ID,
+                client_secret=settings.GOOGLE_CLIENT_SECRET,
+                redirect_uri=f"{settings.GOOGLE_REDIRECT_URI}",
+                grant_type="authorization_code",
+                state=secrets.token_urlsafe(32),
+            ),
+        )
+        if token_response.status_code != status.HTTP_200_OK:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to obtain access token from Google.",
+            )
+
+        tokens = token_response.json()
+        access_token = tokens.get("access_token")
+
+        # Use the access token to get user info
+        userinfo_response = await client.get(
+            GOOGLE_USERINFO_URL,
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        if userinfo_response.status_code != status.HTTP_200_OK:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Failed to obtain user info from Google.",
+            )
+        user_info = userinfo_response.json()
+
+        # Check if user exists, if not create new user
+        user = db.query(Users).filter(Users.email == user_info["email"]).first()
+        if not user:
+            google_username = user_info["email"].split("@")[0]
+            unique_username = f"{google_username}_{secrets.token_hex(4)}"
+            user = Users(
+                email=user_info["email"],
+                username=unique_username,
+                first_name=user_info.get("given_name", ""),
+                last_name=user_info.get("family_name", ""),
+                hashed_password="",  # No password since using Google OAuth
+                is_active=True,
+                role="user",
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+
+        # Create a JWT token for the user
+        token = create_access_token(
+            username=user.username,
+            user_id=user.id,
+            role=user.role,
+            expires_delta=timedelta(minutes=30),
+        )
+
+        response = RedirectResponse(f"{settings.CLIENT_URL}/oauth-success")
+        response.set_cookie(
+            key="access_token",
+            value=token,
+            httponly=True,
+            samesite="lax",
+            max_age=1800,
+        )
+        return response
