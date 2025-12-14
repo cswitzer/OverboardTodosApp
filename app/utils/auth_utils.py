@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from starlette import status
-from typing import Annotated, Any
+from typing import Any
 
 from app.models import Users
 from app.database import Session
@@ -36,9 +36,50 @@ def create_access_token(
         "sub": username,
         "id": user_id,
         "role": role,
+        "token_type": "access",
         "exp": datetime.now() + expires_delta,
     }
     return jwt.encode(claims=body, key=settings.SECRET_KEY, headers=headers)
+
+
+def create_refresh_token(username: str, user_id: int) -> str:
+    headers = {"alg": "HS256", "typ": "JWT"}
+    body = {
+        "sub": username,
+        "id": user_id,
+        "token_type": "refresh",
+        "exp": datetime.now() + timedelta(days=7),
+    }
+    return jwt.encode(claims=body, key=settings.SECRET_KEY, headers=headers)
+
+
+def verify_refresh_token(token: str) -> dict[str, Any]:
+    """Verify the refresh token and return the payload if valid."""
+    try:
+        payload = jwt.decode(
+            token=token,
+            key=settings.SECRET_KEY,
+            algorithms=["HS256"],
+        )
+        if payload.get("token_type") != "refresh":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token type.",
+            )
+
+        username: str | None = payload.get("sub")
+        user_id: int | None = payload.get("id")
+        if username is None or user_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate credentials.",
+            )
+        return {"username": username, "id": user_id}
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate refresh token.",
+        )
 
 
 async def get_current_user(

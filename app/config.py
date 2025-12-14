@@ -18,7 +18,7 @@ class LocalSettings(Settings):
     CELERY_BROKER_URL: str = "redis://redis:6379/0"
     CELERY_RESULT_BACKEND: str = "redis://redis:6379/0"
     SECRET_KEY: str = ""
-    BASE_URL: str = "http://localhost:8000"
+    BASE_URL: str = "http://localhost:8080"
     CLIENT_URL: str = "http://localhost:3000"
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
