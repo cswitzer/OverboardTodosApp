@@ -1,13 +1,14 @@
 from fastapi import FastAPI
-from app.database import engine
+from strawberry.fastapi import GraphQLRouter
+
 import app.models as models
-from app.routers import auth, todos, admin, users, tags
+from app.database import engine
+from app.routers import admin, auth, tags, todos, users
+from gql.context import get_context
+from gql.schema import schema
 
 # from .config import get_settings
 
-from strawberry.fastapi import GraphQLRouter
-from gql.schema import schema
-from gql.context import get_context
 
 app = FastAPI()
 

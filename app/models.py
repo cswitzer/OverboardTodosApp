@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from app.database import Base
-from sqlalchemy import String, Boolean, ForeignKey, Table, Column
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List
+
+from sqlalchemy import Boolean, Column, ForeignKey, String, Table
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.database import Base
 
 
 class Users(Base):

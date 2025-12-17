@@ -1,7 +1,8 @@
-import strawberry
 from typing import Optional
-from app.models import Todos, Users
 
+import strawberry
+
+from app.models import Todos, Users
 
 # Types are used to define the shape of data in GraphQL
 # that is returned to the client.

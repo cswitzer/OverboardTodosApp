@@ -105,3 +105,8 @@ disallow_untyped_defs = true
 
 # exclude alembic directory from mypy checks
 exclude = 'alembic/.*'
+
+[dependency-groups]
+dev = [
+    "isort>=7.0.0",
+]

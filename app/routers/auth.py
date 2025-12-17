@@ -1,29 +1,24 @@
+import secrets
 from datetime import timedelta
 from typing import Annotated, Dict
 from urllib.parse import urlencode
-from fastapi import APIRouter, Depends, HTTPException
+
 import httpx
-import secrets
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
+from passlib.context import CryptContext
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 from starlette import status
 from starlette.responses import RedirectResponse
-from app.models import Users
+
 from app.config import get_settings
 from app.database import get_db
-from app.utils.auth_utils import (
-    authenticate_user,
-    create_access_token,
-    create_refresh_token,
-    verify_refresh_token,
-    GOOGLE_AUTH_URL,
-    GOOGLE_TOKEN_URL,
-    GOOGLE_USERINFO_URL,
-)
-from passlib.context import CryptContext
-from fastapi.security import (
-    OAuth2PasswordRequestForm,
-)
+from app.models import Users
+from app.utils.auth_utils import (GOOGLE_AUTH_URL, GOOGLE_TOKEN_URL,
+                                  GOOGLE_USERINFO_URL, authenticate_user,
+                                  create_access_token, create_refresh_token,
+                                  verify_refresh_token)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

@@ -1,11 +1,13 @@
 from typing import Annotated
-from app.database import get_db
+
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import Field, BaseModel
+from passlib.context import CryptContext
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
+
+from app.database import get_db
 from app.models import Users
 from app.utils.auth_utils import get_current_user
-from passlib.context import CryptContext
 
 router = APIRouter(prefix="/user", tags=["user"])
 

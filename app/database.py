@@ -1,10 +1,10 @@
-from app.config import get_settings
+from typing import Any, Generator
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from typing import Generator, Any
+from sqlalchemy.orm import Session, sessionmaker
+
+from app.config import get_settings
 
 settings = get_settings()
 

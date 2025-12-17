@@ -1,14 +1,15 @@
 from datetime import datetime, timedelta
-from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
-from jose import jwt, JWTError
-from passlib.context import CryptContext
-from starlette import status
 from typing import Any
 
-from app.models import Users
-from app.database import Session
+from fastapi import Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
+from passlib.context import CryptContext
+from starlette import status
+
 from app.config import get_settings
+from app.database import Session
+from app.models import Users
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth_bearer = OAuth2PasswordBearer(tokenUrl="auth/token/")

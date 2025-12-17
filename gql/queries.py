@@ -1,7 +1,10 @@
-import strawberry
 from typing import List, Optional
+
+import strawberry
 from sqlalchemy.orm import Session
+
 from app.models import Todos, Users
+
 from .types import TodoType, UserType
 
 
