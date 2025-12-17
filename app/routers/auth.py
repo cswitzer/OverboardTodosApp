@@ -15,10 +15,15 @@ from starlette.responses import RedirectResponse
 from app.config import get_settings
 from app.database import get_db
 from app.models import Users
-from app.utils.auth_utils import (GOOGLE_AUTH_URL, GOOGLE_TOKEN_URL,
-                                  GOOGLE_USERINFO_URL, authenticate_user,
-                                  create_access_token, create_refresh_token,
-                                  verify_refresh_token)
+from app.utils.auth_utils import (
+    GOOGLE_AUTH_URL,
+    GOOGLE_TOKEN_URL,
+    GOOGLE_USERINFO_URL,
+    authenticate_user,
+    create_access_token,
+    create_refresh_token,
+    verify_refresh_token,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
