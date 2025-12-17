@@ -16,4 +16,5 @@ done
 # must install flower to use the flower option with celery
 celery flower \
   --app=app.celery_app.celery \
-  --broker="${CELERY_BROKER_URL}"
+  --broker="${CELERY_BROKER_URL}" \
+  --url_prefix=flower # set URL prefix for flower when behind a reverse proxy so that it can reference correct styles
