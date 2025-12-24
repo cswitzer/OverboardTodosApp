@@ -46,3 +46,23 @@ RUN chmod +x /entrypoint /start /start-celeryworker /start-celerybeat /start-flo
 COPY . /app
 
 ENTRYPOINT ["/entrypoint"]
+
+# -------------------------
+# Stage 3: Development
+# -------------------------
+
+FROM runtime AS dev
+
+# Dev-only OS tools
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        libpq-dev \
+        telnet \
+        netcat-openbsd && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir \
+    debugpy \
+    ipython \
+    watchfiles
