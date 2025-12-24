@@ -2,7 +2,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: ./compose/fastapi/Dockerfile
+      dockerfile: ./compose/fastapi/Dockerfile.dev
     image: todo-web:latest
     container_name: todo-web
     # command refers to area in container where the start script is located, and
@@ -38,7 +38,7 @@ services:
   celery_worker:
     build:
       context: .
-      dockerfile: ./compose/fastapi/Dockerfile
+      dockerfile: ./compose/fastapi/Dockerfile.dev
     image: todo-celery-worker:latest
     container_name: todo-celery-worker
     command: /start-celeryworker
@@ -54,7 +54,7 @@ services:
   celery_beat:
     build:
       context: .
-      dockerfile: ./compose/fastapi/Dockerfile
+      dockerfile: ./compose/fastapi/Dockerfile.dev
     image: todo-celery-beat:latest
     container_name: todo-celery-beat
     command: /start-celerybeat
@@ -70,7 +70,7 @@ services:
   flower:
     build:
       context: .
-      dockerfile: ./compose/fastapi/Dockerfile
+      dockerfile: ./compose/fastapi/Dockerfile.dev
     image: todo-flower:latest
     container_name: todo-flower
     command: /start-flower
